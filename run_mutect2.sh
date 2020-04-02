@@ -55,8 +55,8 @@ then
         -t $NUM_THREAD \
         -K 10000000 \
         $REF_GENOME_PATH \
-        <(bunzip2 -k $NORMAL_FASTQ_1_PATH) \
-        <(bunzip2 -k $NORMAL_FASTQ_2_PATH) 2> $OUTPUT_PATH/normal_bwa.log \
+        <(bunzip2 -c $NORMAL_FASTQ_1_PATH) \
+        <(bunzip2 -c $NORMAL_FASTQ_2_PATH) 2> $OUTPUT_PATH/normal_bwa.log \
         | $SAMTOOLS_PATH/samtools sort -@10 -o $OUTPUT_PATH/normal.bam
 
     # for tumor samples
@@ -65,8 +65,8 @@ then
         -t $NUM_THREAD \
         -K 10000000 \
         $REF_GENOME_PATH \
-        <(bunzip2 -k $TUMOR_FASTQ_1_PATH) \
-        <(bunzip2 -k $TUMOR_FASTQ_2_PATH) 2> $OUTPUT_PATH/tumor_bwa.log \
+        <(bunzip2 -c $TUMOR_FASTQ_1_PATH) \
+        <(bunzip2 -c $TUMOR_FASTQ_2_PATH) 2> $OUTPUT_PATH/tumor_bwa.log \
         | $SAMTOOLS_PATH/samtools sort -@10 -o $OUTPUT_PATH/tumor.bam
 fi
 
