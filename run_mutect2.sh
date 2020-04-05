@@ -5,10 +5,6 @@ PICARD_PATH=/pkg/biology/Picard/Picard_v2.18.11/picard.jar
 BWA_PATH=/pkg/biology/BWA/BWA_v0.7.17
 SAMTOOLS_PATH=/pkg/biology/SAMtools/SAMtools_v1.10/bin
 
-REF_GENOME_PATH=/project/GP1/u3710062/AI_SHARE/reference/GATK_bundle/hg38/Homo_sapiens_assembly38.fasta
-# REF_GENOME_PATH=/home/hsiaoyi0504/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
-HUMAN_DBSNP_PATH=/home/hsiaoyi0504/Homo_sapiens_assembly38.dbsnp138.vcf
-
 TUMOR_FASTQ_1_PATH=$1
 TUMOR_FASTQ_2_PATH=$2
 NORMAL_FASTQ_1_PATH=$3
@@ -16,7 +12,12 @@ NORMAL_FASTQ_2_PATH=$4
 TUMOR_READGROUP=$5
 NORMAL_READGROUP=$6
 OUTPUT_PATH=$7
+REF_GENOME_PATH=$8
+HUMAN_DBSNP_PATH=$9
 
+# REF_GENOME_PATH=/project/GP1/u3710062/AI_SHARE/reference/GATK_bundle/hg38/Homo_sapiens_assembly38.fasta
+# REF_GENOME_PATH=/home/hsiaoyi0504/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
+# HUMAN_DBSNP_PATH=/home/hsiaoyi0504/Homo_sapiens_assembly38.dbsnp138.vcf
 
 # Ideally, you don't need to modify following lines
 
