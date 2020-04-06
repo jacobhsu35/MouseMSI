@@ -122,7 +122,7 @@ $GATK_PATH/gatk BaseRecalibrator \
 $GATK_PATH/gatk AnalyzeCovariates \
  --before-report-file $OUTPUT_PATH/normal_recal_pass1.table \
  --after-report-file $OUTPUT_PATH/normal_recal_pass2.table \
- --plots-report-file $OUTPUT_PATH/normal_covariates.pdf 
+ --plots-report-file $OUTPUT_PATH/normal_covariates.pdf > $OUTPUT_PATH/normal_analyze_covariates.log 2>&1
 
 ## for tumor
 ### BQSR first pass
@@ -130,32 +130,32 @@ $GATK_PATH/gatk BaseRecalibrator \
  -I=$OUTPUT_PATH/tumor_marked.bam \
  -R=$REF_GENOME_PATH \
  --known-sites $HUMAN_DBSNP_PATH \
- -O=$OUTPUT_PATH/tumor_recal_pass1.table
+ -O=$OUTPUT_PATH/tumor_recal_pass1.table > $OUTPUT_PATH/tumor_BQSR_first_pass.log 2>&1
 
 $GATK_PATH/gatk ApplyBQSR \
  -I=$OUTPUT_PATH/tumor_marked.bam \
  -R=$REF_GENOME_PATH \
  --bqsr-recal-file $OUTPUT_PATH/tumor_recal_pass1.table \
- -O=$OUTPUT_PATH/tumor_marked.recal.pass1.bam
+ -O=$OUTPUT_PATH/tumor_marked.recal.pass1.bam > $OUTPUT_PATH/tumor_apply_BQSR.log 2>&1
 
  ### BQSR second pass
 $GATK_PATH/gatk BaseRecalibrator \
  -I=$OUTPUT_PATH/tumor_marked.recal.pass1.bam \
  -R=$REF_GENOME_PATH \
  --known-sites $HUMAN_DBSNP_PATH \
- -O=$OUTPUT_PATH/tumor_recal_pass2.table
+ -O=$OUTPUT_PATH/tumor_recal_pass2.table > $OUTPUT_PATH/tumor_BQSR_second_pass.log 2>&1
 
 ### Analyze covariates
 $GATK_PATH/gatk AnalyzeCovariates \
  --before-report-file $OUTPUT_PATH/tumor_recal_pass1.table \
  --after-report-file $OUTPUT_PATH/tumor_recal_pass2.table \
- --plots-report-file $OUTPUT_PATH/tumor_covariates.pdf
+ --plots-report-file $OUTPUT_PATH/tumor_covariates.pdf > $OUTPUT_PATH/tumor_analyze_covariates.log 2>&1
 
 # Mutect
 ## get sample names that will be used for later in several command line calls 
 
-$GATK_PATH/gatk GetSampleName  -I $OUTPUT_PATH/tumor_marked.recal.pass1.bam -O $OUTPUT_PATH/tumor_sample_name.txt
-$GATK_PATH/gatk GetSampleName  -I $OUTPUT_PATH/normal_marked.recal.pass1.bam -O $OUTPUT_PATH/normal_sample_name.txt
+$GATK_PATH/gatk GetSampleName -I $OUTPUT_PATH/tumor_marked.recal.pass1.bam -O $OUTPUT_PATH/tumor_sample_name.txt
+$GATK_PATH/gatk GetSampleName -I $OUTPUT_PATH/normal_marked.recal.pass1.bam -O $OUTPUT_PATH/normal_sample_name.txt
 
 TUMOR_SAMPLE_NAME=$(cat $OUTPUT_PATH/tumor_sample_name.txt)
 NORMAL_SAMPLE_NAME=$(cat $OUTPUT_PATH/normal_sample_name.txt)
@@ -169,5 +169,5 @@ $GATK_PATH/gatk Mutect2 \
  -tumor $TUMOR_SAMPLE_NAME \
  -normal $NORMAL_SAMPLE_NAME \
  -O $OUTPUT_PATH/Mutect2.vcf.gz \
- -bamout $OUTPUT_PATH/Mutect2.bam
+ -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log 2>&1
 
