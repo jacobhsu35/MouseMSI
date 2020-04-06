@@ -2,6 +2,7 @@ from glob import glob
 import subprocess
 import csv
 import numpy as np
+import pandas as pd
 
 DATA_PATH = '/volume/cancer-mutect2/PCAWG_CLL_vcf_reindex'
 file_names = glob(DATA_PATH + '/*.snv_mnv.vcf.gz')
@@ -98,10 +99,24 @@ for donor_id in donor_ids:
 
 print('Average number of SNPs in consensus set: {}'.format(np.average(consensus_num_of_SNPs)))
 print('Average number of SNPs called by dkfz but not in consensus set: {}'.format(np.average(dkfz_num_of_SNPs)))
-print('Average number of SNPs only called by MUSE but not in consensus set: {}'.format(np.average(MUSE_num_of_SNPs)))
-print('Average number of SNPs only called by svcp but not in consensus set: {}'.format(np.average(svcp_num_of_SNPs)))
-print('Average number of SNPs only called by broad mutect but not in consensus set: {}'.format(np.average(broad_mutect_num_of_SNPs)))
+print('Average number of SNPs called by MUSE but not in consensus set: {}'.format(np.average(MUSE_num_of_SNPs)))
+print('Average number of SNPs called by svcp but not in consensus set: {}'.format(np.average(svcp_num_of_SNPs)))
+print('Average number of SNPs called by broad mutect but not in consensus set: {}'.format(np.average(broad_mutect_num_of_SNPs)))
 print('Average number of SNPs called by dkfz and in the consensus set: {}'.format(np.average(consensus_dkfz_common_num_of_SNPs)))
 print('Average number of SNPs called by MUSE and in the consensus set: {}'.format(np.average(consensus_MUSE_common_num_of_SNPs)))
 print('Average number of SNPs called by svcp and in the consensus set: {}'.format(np.average(consensus_svcp_common_num_of_SNPs)))
 print('Average number of SNPs called by broad mutect and in the consensus set: {}'.format(np.average(consensus_broad_mutect_common_num_of_SNPs)))
+
+df = pd.DataFrame(data={
+        'Number of SNPs in consensus set': consensus_num_of_SNPs,
+        'Number of SNPs called by dkfz but not in consensus set': dkfz_num_of_SNPs,
+        'Number of SNPs called by MUSE but not in consensus set': MUSE_num_of_SNPs,
+        'Number of SNPs called by svcp but not in consensus set': svcp_num_of_SNPs,
+        'Number of SNPs called by broad mutect but not in consensus set': broad_mutect_num_of_SNPs,
+        'Number of SNPs called by dkfz and in the consensus set': consensus_dkfz_common_num_of_SNPs,
+        'Number of SNPs called by MUSE and in the consensus set': consensus_MUSE_common_num_of_SNPs,
+        'Number of SNPs called by svcp and in the consensus set': consensus_svcp_common_num_of_SNPs,
+        'Number of SNPs called by broad mutect and in the consensus set': consensus_broad_mutect_common_num_of_SNPs
+    })
+
+df.to_pickle('./result.pkl')
