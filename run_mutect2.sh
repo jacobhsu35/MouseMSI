@@ -35,7 +35,7 @@ then
         $REF_GENOME_PATH \
         $NORMAL_FASTQ_1_PATH \
         $NORMAL_FASTQ_2_PATH 2> $OUTPUT_PATH/normal_bwa.log \
-        | $SAMTOOLS_PATH/samtools sort -@10 -o $OUTPUT_PATH/normal.bam
+        | $SAMTOOLS_PATH/samtools sort -@$NUM_THREAD -o $OUTPUT_PATH/normal.bam
 
     # for tumor samples
     $BWA_PATH/bwa mem -M \
@@ -45,7 +45,7 @@ then
         $REF_GENOME_PATH \
         $TUMOR_FASTQ_1_PATH \
         $TUMOR_FASTQ_2_PATH 2> $OUTPUT_PATH/tumor_bwa.log \
-        | $SAMTOOLS_PATH/samtools sort -@10 -o $OUTPUT_PATH/tumor.bam
+        | $SAMTOOLS_PATH/samtools sort -@$NUM_THREAD -o $OUTPUT_PATH/tumor.bam
 elif [[ $NORMAL_FASTQ_1_PATH == *.fastq.bz2 ]]
 then
     # deal with bz2 files
@@ -58,7 +58,7 @@ then
         $REF_GENOME_PATH \
         <(bunzip2 -c $NORMAL_FASTQ_1_PATH) \
         <(bunzip2 -c $NORMAL_FASTQ_2_PATH) 2> $OUTPUT_PATH/normal_bwa.log \
-        | $SAMTOOLS_PATH/samtools sort -@10 -o $OUTPUT_PATH/normal.bam
+        | $SAMTOOLS_PATH/samtools sort -@$NUM_THREAD -o $OUTPUT_PATH/normal.bam
 
     # for tumor samples
     $BWA_PATH/bwa mem -M \
@@ -68,7 +68,7 @@ then
         $REF_GENOME_PATH \
         <(bunzip2 -c $TUMOR_FASTQ_1_PATH) \
         <(bunzip2 -c $TUMOR_FASTQ_2_PATH) 2> $OUTPUT_PATH/tumor_bwa.log \
-        | $SAMTOOLS_PATH/samtools sort -@10 -o $OUTPUT_PATH/tumor.bam
+        | $SAMTOOLS_PATH/samtools sort -@$NUM_THREAD -o $OUTPUT_PATH/tumor.bam
 fi
 
 java -jar $PICARD_PATH ValidateSamFile \
@@ -169,5 +169,6 @@ $GATK_PATH/gatk Mutect2 \
  -tumor $TUMOR_SAMPLE_NAME \
  -normal $NORMAL_SAMPLE_NAME \
  -O $OUTPUT_PATH/Mutect2.vcf.gz \
- -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log 2>&1
+ -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log \
+ --native-pair-hmm-threads $NUM_THREAD 2>&1
 
