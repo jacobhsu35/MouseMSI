@@ -1,2 +1,4 @@
 yapf>=0.29.0
 numpy
+pandas>=1.0.3
+PyVCF==0.6.8
