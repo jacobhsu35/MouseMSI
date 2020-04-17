@@ -21,7 +21,7 @@ HUMAN_DBSNP_PATH=$9
 
 # Ideally, you don't need to modify following lines
 
-NUM_THREAD=10
+NUM_THREAD=40
 
 mkdir -p $OUTPUT_PATH
 
@@ -169,6 +169,5 @@ $GATK_PATH/gatk Mutect2 \
  -tumor $TUMOR_SAMPLE_NAME \
  -normal $NORMAL_SAMPLE_NAME \
  -O $OUTPUT_PATH/Mutect2.vcf.gz \
- -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log \
- --native-pair-hmm-threads $NUM_THREAD 2>&1
-
+ --native-pair-hmm-threads $NUM_THREAD 2>&1 \
+ -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log
