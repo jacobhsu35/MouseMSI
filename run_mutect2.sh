@@ -14,6 +14,8 @@ NORMAL_READGROUP=$6
 OUTPUT_PATH=$7
 REF_GENOME_PATH=$8
 HUMAN_DBSNP_PATH=$9
+GERMLINE_RESOURCE_PATH=${10}
+GERMLINE_RESOURCE_FOR_PILEUP_PATH=${11}
 
 # REF_GENOME_PATH=/project/GP1/u3710062/AI_SHARE/reference/GATK_bundle/hg38/Homo_sapiens_assembly38.fasta
 # REF_GENOME_PATH=/home/hsiaoyi0504/GCA_000001405.15_GRCh38_no_alt_analysis_set.fna
@@ -168,6 +170,29 @@ $GATK_PATH/gatk Mutect2 \
  -I $OUTPUT_PATH/normal_marked.recal.pass1.bam \
  -tumor $TUMOR_SAMPLE_NAME \
  -normal $NORMAL_SAMPLE_NAME \
+ -germline-resource $GERMLINE_RESOURCE_PATH \
  -O $OUTPUT_PATH/Mutect2.vcf.gz \
- --native-pair-hmm-threads $NUM_THREAD 2>&1 \
- -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log
+ --f1r2-tar-gz $OUTPUT_PATH/f1r2.tar.gz \
+ -bamout $OUTPUT_PATH/Mutect2.bam \
+ --native-pair-hmm-threads $NUM_THREAD > $OUTPUT_PATH/mutect2.log 2>&1
+
+$GATK_PATH/gatk LearnReadOrientationModel -I $OUTPUT_PATH/f1r2.tar.gz -O $OUTPUT_PATH/read-orientation-model.tar.gz
+
+$GATK_PATH/gatk GetPileupSummaries \
+    -I $OUTPUT_PATH/tumor_marked.recal.pass1.bam \
+    -V $GERMLINE_RESOURCE_FOR_PILEUP_PATH \
+    -L $GERMLINE_RESOURCE_FOR_PILEUP_PATH \
+    -O $OUTPUT_PATH/getpileupsummaries.table > $OUTPUT_PATH/get_pileup_summaries.log 2>&1
+
+$GATK_PATH/gatk CalculateContamination \
+    -I $OUTPUT_PATH/getpileupsummaries.table \
+    -tumor-segmentation $OUTPUT_PATH/tumor_segments.table \
+    -O $OUTPUT_PATH/contamination.table > $OUTPUT_PATH/calculate_contamination.log 2>&1
+
+$GATK_PATH/gatk FilterMutectCalls \
+    -R $REF_GENOME_PATH \
+    -V $OUTPUT_PATH/Mutect2.vcf.gz \
+    --tumor-segmentation $OUTPUT_PATH/tumor_segments.table \
+    --contamination-table $OUTPUT_PATH/contamination.table \
+    --ob-priors $OUTPUT_PATH/read-orientation-model.tar.gz \
+    -O $OUTPUT_PATH/filtered.vcf > $OUTPUT_PATH/filter_mutect_calls.log 2>&1 
