@@ -1,4 +1,4 @@
-# CLL
+# Pipeline
 
 ## Prerequisite
 - Python >= 3.5
