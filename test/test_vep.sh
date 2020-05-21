@@ -1,0 +1,1 @@
+../run_vep.sh ./minimal_example.vcf ./minimal_example.vep.vcf
