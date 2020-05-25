@@ -4,6 +4,8 @@ GATK_PATH=/pkg/biology/GATK/GATK_v4.1.6.0
 PICARD_PATH=/pkg/biology/Picard/Picard_v2.18.11/picard.jar
 BWA_PATH=/pkg/biology/BWA/BWA_v0.7.17
 SAMTOOLS_PATH=/pkg/biology/SAMtools/SAMtools_v1.10/bin
+BCFTOOLS_PATH=/pkg/biology/BCFtools/BCFtools_v1.10.2/bin
+SVABA_PATH=/pkg/biology/SvABA/SvABA_v1.1.0/bin
 
 TUMOR_FASTQ_1_PATH=$1
 TUMOR_FASTQ_2_PATH=$2
@@ -195,4 +197,29 @@ $GATK_PATH/gatk FilterMutectCalls \
     --tumor-segmentation $OUTPUT_PATH/tumor_segments.table \
     --contamination-table $OUTPUT_PATH/contamination.table \
     --ob-priors $OUTPUT_PATH/read-orientation-model.tar.gz \
-    -O $OUTPUT_PATH/filtered.vcf > $OUTPUT_PATH/filter_mutect_calls.log 2>&1 
+    -O $OUTPUT_PATH/filtered.vcf > $OUTPUT_PATH/filter_mutect_calls.log 2>&1
+
+
+cd $OUTPUT_PATH
+
+$SVABA_PATH/svaba run -t $OUTPUT_PATH/tumor_marked.recal.pass1.bam -n $OUTPUT_PATH/normal_marked.recal.pass1.bam -G $REF_GENOME_PATH -a somatic_run -p $NUM_THREAD -D /project/GP1/j116831/AI_Labs/ref/cancer/dbsnp_indel.vcf 
+
+SVABA_INDEL_VCF_PATH=$OUTPUT_PATH/somatic_run.svaba.somatic.indel.vcf
+
+$GATK_PATH/gatk SelectVariants \
+	-R $REF_GENOME_PATH \
+	-V $OUTPUT_PATH/filtered.vcf \
+	--select-type-to-include SNP \
+	-O $OUTPUT_PATH/filtered.snp.vcf.gz
+
+$GATK_PATH/gatk SelectVariants \
+	-R $REF_GENOME_PATH \
+	-V $OUTPUT_PATH/filtered.vcf \
+	--select-type-to-include INDEL \
+	-O $OUTPUT_PATH/filtered.indel.vcf.gz
+
+$BCFTOOLS_PATH/bcftools view $SVABA_INDEL_VCF_PATH -Oz -o $OUTPUT_PATH/svaba.indel.vcf.gz
+$BCFTOOLS_PATH/bcftools index $OUTPUT_PATH/svaba.indel.vcf.gz
+
+$BCFTOOLS_PATH/bcftools isec -n=2 $OUTPUT_PATH/filtered.indel.vcf.gz $OUTPUT_PATH/svaba.indel.vcf.gz -w 1 -Oz -o $OUTPUT_PATH/consensus.indel.vcf.gz
+
