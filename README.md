@@ -10,12 +10,16 @@
   - FTP sever of GATK
 
 ``` shell
+# reference genome sequence
 wget https://storage.googleapis.com/gatk-best-practices/somatic-b37/Homo_sapiens_assembly19.fasta
 wget https://storage.googleapis.com/gatk-best-practices/somatic-b37/Homo_sapiens_assembly19.dict
 wget https://storage.googleapis.com/gatk-best-practices/somatic-b37/Homo_sapiens_assembly19.fasta.fai
 
 wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg19/dbsnp_138.hg19.vcf.gz
 wget ftp://gsapubftp-anonymous@ftp.broadinstitute.org/bundle/hg19/dbsnp_138.hg19.vcf.idx.gz
+# the downloaded vcf file for dbSNP need to be decompressed first
+gzip -d dbsnp_138.hg19.vcf.gz
+gzip -d dbsnp_138.hg19.vcf.idx.gz
 ```
 
 ## Reference Links
