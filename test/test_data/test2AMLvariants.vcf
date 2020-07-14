@@ -1,0 +1,125 @@
+##fileformat=VCFv4.2
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Allelic depths (counting only informative reads out of the total reads) for the ref and alt alleles in the order listed">
+##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele fractions for alt alleles in the order listed">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth (reads with MQ=255 or with bad mates are filtered)">
+##FORMAT=<ID=F1R2,Number=R,Type=Integer,Description="Count of reads in F1R2 pair orientation supporting each allele">
+##FORMAT=<ID=F2R1,Number=R,Type=Integer,Description="Count of reads in F2R1 pair orientation supporting each allele">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=MB,Number=4,Type=Integer,Description="Per-sample component statistics to detect mate bias">
+##FORMAT=<ID=PS,Number=1,Type=Integer,Description="Physical phasing ID information, where each unique ID within a given sample (but not across samples) connects records within a phasing group">
+##FORMAT=<ID=SB,Number=4,Type=Integer,Description="Per-sample component statistics which comprise the Fisher's Exact Test to detect strand bias">
+##FORMAT=<ID=SQ,Number=1,Type=Float,Description="Somatic quality">
+##DRAGENCommandLine=<ID=HashTableBuild,Version="SW: 01.003.044.3.5.7, HashTableVersion: 8",CommandLineOptions="dragen --build-hash-table true --ht-reference /work2/u00srx00/reference/GATK/human_g1k_v37/human_g1k_v37_decoy.fasta --output-dir /work2/u1067478/Dragen/Reference/v3.5.7/hg19/ --ht-num-threads=40 --enable-cnv=true --enable-rna=true">
+##DRAGENCommandLine=<ID=dragen,Version="SW: 07.021.510.3.5.7, HW: 07.021.510",Date="Fri Mar 13 12:20:30 CST 2020",CommandLineOptions="-f -r /work2/u1067478/DRAGEN/Reference/v3.5.7/hg19/ --output-directory /work2/u1067478/DRAGEN/Outputs/hg19/NHRI-SLY-AML-001_hg19 --output-file-prefix Dragen_NHRI-SLY-AML-001_hg19 --tumor-fastq1 /work2/u1067478/Rawdata/AML/NHRI-SLY-AML-001-F1_R1_001.fastq.gz --tumor-fastq2 /work2/u1067478/Rawdata/AML/NHRI-SLY-AML-001-F1_R2_001.fastq.gz --RGSM-tumor NHRI-SLY-AML-001_T --RGID-tumor NovaSeq_T -1 /work2/u1067478/Rawdata/AML/NHRI-SLY-AML-001-oral_R1_001.fastq.gz -2 /work2/u1067478/Rawdata/AML/NHRI-SLY-AML-001-oral_R2_001.fastq.gz --RGSM NHRI-SLY-AML-001_N --RGID NovaSeq_N --vc-enable-liquid-tumor-mode true --enable-variant-caller true">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Approximate read depth (informative and non-informative); some reads may have been filtered based on mapq etc.">
+##INFO=<ID=FractionInformativeReads,Number=1,Type=Float,Description="The fraction of informative reads out of the total reads">
+##INFO=<ID=MQ,Number=1,Type=Float,Description="RMS Mapping Quality">
+##INFO=<ID=MQRankSum,Number=1,Type=Float,Description="Z-score From Wilcoxon rank sum test of Alt vs. Ref read mapping qualities">
+##INFO=<ID=ReadPosRankSum,Number=1,Type=Float,Description="Z-score from Wilcoxon rank sum test of Alt vs. Ref read position bias">
+##INFO=<ID=TLOD,Number=A,Type=Float,Description="Tumor LOD score">
+##INFO=<ID=NLOD,Number=A,Type=Float,Description="Normal LOD score">
+##FILTER=<ID=alt_allele_in_normal,Description="ALT allele frequency is too high in the normal sample">
+##FILTER=<ID=base_quality,Description="Site filtered because median base quality of alt reads at this locus does not meet threshold">
+##FILTER=<ID=filtered_reads,Description="Site filtered because too large a fraction of reads have been filtered out">
+##FILTER=<ID=fragment_length,Description="Site filtered because absolute difference between the median fragment length of alt reads and median fragment length of ref reads at this locus exceeds threshold">
+##FILTER=<ID=mapping_quality,Description="Site filtered because median mapping quality of alt reads at this locus does not meet threshold">
+##FILTER=<ID=multiallelic,Description="Site filtered because more than two alt alleles pass tumor LOD">
+##FILTER=<ID=non_homref_normal,Description="Site filtered because the normal sample genotype is not homozygous reference">
+##FILTER=<ID=no_reliable_supporting_read,Description="Site filtered because no reliable supporting somatic read exists">
+##FILTER=<ID=noisy_normal,Description="Site filtered because too many alleles are observed in the normal sample">
+##FILTER=<ID=panel_of_normals,Description="Seen in at least one sample in the panel of normals vcf">
+##FILTER=<ID=read_position,Description="Site filtered because median of distances between start/end of read and this locus exceeds threshold">
+##FILTER=<ID=strand_artifact,Description="Site filtered because of severe strand bias">
+##FILTER=<ID=str_contraction,Description="Site filtered due to suspected PCR error where the alt allele is one repeat unit less than the reference">
+##FILTER=<ID=too_few_supporting_reads,Description="Site filtered because there are too few supporting reads in the tumor sample">
+##FILTER=<ID=weak_evidence,Description="Somatic variant score does not meet threshold">
+##contig=<ID=1,length=249250621>
+##contig=<ID=2,length=243199373>
+##contig=<ID=3,length=198022430>
+##contig=<ID=4,length=191154276>
+##contig=<ID=5,length=180915260>
+##contig=<ID=6,length=171115067>
+##contig=<ID=7,length=159138663>
+##contig=<ID=8,length=146364022>
+##contig=<ID=9,length=141213431>
+##contig=<ID=10,length=135534747>
+##contig=<ID=11,length=135006516>
+##contig=<ID=12,length=133851895>
+##contig=<ID=13,length=115169878>
+##contig=<ID=14,length=107349540>
+##contig=<ID=15,length=102531392>
+##contig=<ID=16,length=90354753>
+##contig=<ID=17,length=81195210>
+##contig=<ID=18,length=78077248>
+##contig=<ID=19,length=59128983>
+##contig=<ID=20,length=63025520>
+##contig=<ID=21,length=48129895>
+##contig=<ID=22,length=51304566>
+##contig=<ID=X,length=155270560>
+##contig=<ID=Y,length=59373566>
+##contig=<ID=MT,length=16569>
+##contig=<ID=GL000207.1,length=4262>
+##contig=<ID=GL000226.1,length=15008>
+##contig=<ID=GL000229.1,length=19913>
+##contig=<ID=GL000231.1,length=27386>
+##contig=<ID=GL000210.1,length=27682>
+##contig=<ID=GL000239.1,length=33824>
+##contig=<ID=GL000235.1,length=34474>
+##contig=<ID=GL000201.1,length=36148>
+##contig=<ID=GL000247.1,length=36422>
+##contig=<ID=GL000245.1,length=36651>
+##contig=<ID=GL000197.1,length=37175>
+##contig=<ID=GL000203.1,length=37498>
+##contig=<ID=GL000246.1,length=38154>
+##contig=<ID=GL000249.1,length=38502>
+##contig=<ID=GL000196.1,length=38914>
+##contig=<ID=GL000248.1,length=39786>
+##contig=<ID=GL000244.1,length=39929>
+##contig=<ID=GL000238.1,length=39939>
+##contig=<ID=GL000202.1,length=40103>
+##contig=<ID=GL000234.1,length=40531>
+##contig=<ID=GL000232.1,length=40652>
+##contig=<ID=GL000206.1,length=41001>
+##contig=<ID=GL000240.1,length=41933>
+##contig=<ID=GL000236.1,length=41934>
+##contig=<ID=GL000241.1,length=42152>
+##contig=<ID=GL000243.1,length=43341>
+##contig=<ID=GL000242.1,length=43523>
+##contig=<ID=GL000230.1,length=43691>
+##contig=<ID=GL000237.1,length=45867>
+##contig=<ID=GL000233.1,length=45941>
+##contig=<ID=GL000204.1,length=81310>
+##contig=<ID=GL000198.1,length=90085>
+##contig=<ID=GL000208.1,length=92689>
+##contig=<ID=GL000191.1,length=106433>
+##contig=<ID=GL000227.1,length=128374>
+##contig=<ID=GL000228.1,length=129120>
+##contig=<ID=GL000214.1,length=137718>
+##contig=<ID=GL000221.1,length=155397>
+##contig=<ID=GL000209.1,length=159169>
+##contig=<ID=GL000218.1,length=161147>
+##contig=<ID=GL000220.1,length=161802>
+##contig=<ID=GL000213.1,length=164239>
+##contig=<ID=GL000211.1,length=166566>
+##contig=<ID=GL000199.1,length=169874>
+##contig=<ID=GL000217.1,length=172149>
+##contig=<ID=GL000216.1,length=172294>
+##contig=<ID=GL000215.1,length=172545>
+##contig=<ID=GL000205.1,length=174588>
+##contig=<ID=GL000219.1,length=179198>
+##contig=<ID=GL000224.1,length=179693>
+##contig=<ID=GL000223.1,length=180455>
+##contig=<ID=GL000195.1,length=182896>
+##contig=<ID=GL000212.1,length=186858>
+##contig=<ID=GL000222.1,length=186861>
+##contig=<ID=GL000200.1,length=187035>
+##contig=<ID=GL000193.1,length=189789>
+##contig=<ID=GL000194.1,length=191469>
+##contig=<ID=GL000225.1,length=211173>
+##contig=<ID=GL000192.1,length=547496>
+##contig=<ID=NC_007605,length=171823>
+##contig=<ID=hs37d5,length=35477943>
+##reference=file:///work2/u1067478/DRAGEN/Reference/v3.5.7/hg19/reference.bin
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NHRI-SLY-AML-001_N	NHRI-SLY-AML-001_T
+5	170837543	.	C	CTCTG	.	PASS	DP=84;MQ=53.41;TLOD=19.61;NLOD=-5.59;FractionInformativeReads=0.964	GT:SQ:AD:AF:F1R2:F2R1:DP:SB:MB	0/0:-5.59:13,0:0.000:8,0:5,0:13:.:.	0/1:19.61:35,33:0.485:16,13:19,20:68:28,7,18,15:17,18,16,17
+15	90631934	.	C	T	.	PASS	DP=77;MQ=51.62;TLOD=41.81;NLOD=23.01;FractionInformativeReads=1.000	GT:SQ:AD:AF:F1R2:F2R1:DP:SB:MB	0/0:23.01:20,0:0.000:8,0:12,0:20:.:.	0/1:41.81:36,21:0.368:26,9:10,12:57:21,15,15,6:17,19,11,10

@@ -1,6 +1,6 @@
-VEP_CACHE_DIR=/project/GP1/j116831/AI_Labs/VEP/Cache
-VEP_PLUGIN_DIR=$VEP_CACHE_DIR/Plugins
-VEP_PLUGIN_DATA_DIR=/project/GP1/j116831/AI_Labs/VEP/Data_for_plugins
+VEP_CACHE_DIR=/pkg/biology/DATABASES/vep-j116831/Cache
+VEP_PLUGIN_DIR=/pkg/biology/DATABASES/vep-j116831/Plugins
+VEP_PLUGIN_DATA_DIR=/pkg/biology/DATABASES/vep-j116831/Data_for_plugins
 VEP_PATH=/pkg/biology/Ensembl-VEP/Ensembl-VEP_v99.2
 HTSLIB_PATH=/pkg/biology/HTSLIB/HTSLIB_v1.10.2/bin/
 export PATH=$HTSLIB_PATH:$PATH
@@ -21,8 +21,8 @@ $VEP_PATH/vep --cache --offline \
     --vcf \
     -o $OUTPUT_VCF_PATH \
     --check_existing \
-    --plugin LoFtool,$VEP_CACHE_DIR/Plugins/LoFtool_scores.txt \
-    --plugin ExACpLI,$VEP_CACHE_DIR/Plugins/ExACpLI_values.txt \
+    --plugin LoFtool,$VEP_PLUGIN_DIR/LoFtool_scores.txt \
+    --plugin ExACpLI,$VEP_PLUGIN_DIR/ExACpLI_values.txt \
     --plugin MPC,$VEP_PLUGIN_DATA_DIR/fordist_constraint_official_mpc_values_v2.txt.gz \
     --plugin LOVD \
     --plugin FlagLRG,$VEP_PLUGIN_DATA_DIR/list_LRGs_transcripts_xrefs.txt \

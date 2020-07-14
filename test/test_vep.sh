@@ -1,1 +1,1 @@
-../run_vep.sh ./minimal_example.vcf ./minimal_example.vep.vcf
+../run_vep.sh ./test_data/test2AMLvariants.vcf ./test_data_output/test2AMLvariants.vep.vcf
