@@ -11,7 +11,7 @@ module load biology/Perl/default
 INPUT_VCF_PATH=$1
 OUTPUT_VCF_PATH=$2
 
-$VEP_PATH/vep --assembly GRCh37 \
+$VEP_PATH/vep --assembly GRCh37 --database \
     --port 3337 \
     --dir_plugins $VEP_PLUGIN_DIR \
     -i $INPUT_VCF_PATH \
