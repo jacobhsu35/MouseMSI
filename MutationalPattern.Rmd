@@ -1,0 +1,330 @@
+---
+title: '20200707'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("MutationalPatterns")
+BiocManager::install("BSgenome.Hsapiens.1000genomes.hs37d5")
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg19.masked")
+BiocManager::install("gridExtra")
+
+```
+
+
+```{r}
+library(BSgenome)
+#available.genomes()
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg19")
+ref_genome <- "BSgenome.Hsapiens.UCSC.hg19"
+library(ref_genome, character.only = TRUE)
+```
+
+```{r}
+Sys.setenv(PKG_CONFIG_PATH="/usr/local/opt/openssl@1.1/lib/pkgconfig")
+install.packages("openssl")
+##install from sources the package which needs compilation? (Yes/no/cancel) No
+```
+```{r}
+library(MutationalPatterns)
+```
+
+```{r}
+#Locate the VCF files of the example data
+vcf_files <- list.files(path = "/Users/shihyu/Documents/Python/Mutational_Pattern/CLL_WES",
+                        pattern = ".normPASS.vcf", full.names = TRUE)
+head(vcf_files,13)
+#Define corresponding sample names for the VCF files
+#remove ,"CLL05A"
+sample_names <- c("CLL014","CLL01A","CLL026","CLL02A","CLL030","CLL031","CLL038","CLL040","CLL042","CLL09A","CLL213","CLL226","CLL244")
+
+#Load the VCF files into a GRangesList
+vcfs <- read_vcfs_as_granges(vcf_files, sample_names, ref_genome)
+summary(vcfs)
+```
+
+```{r}
+muts = mutations_from_vcf(vcfs[[1]])
+#head(muts, 12)
+types = mut_type(vcfs[[1]])
+#head(types, 12)
+context = mut_context(vcfs[[1]], ref_genome)
+#head(context, 12)
+
+type_context = type_context(vcfs[[1]], ref_genome)
+lapply(type_context, head, 30)
+```
+
+```{r}
+type_occurrences1 <- mut_type_occurrences(vcfs, ref_genome)
+```
+
+```{r}
+library("gridExtra")
+```
+
+```{r}
+library(ggplot2)
+library(RColorBrewer)
+cols <- brewer.pal(7, "Pastel1")
+p1 <- plot_spectrum(type_occurrences1,colors =cols)
+p2 <- plot_spectrum(type_occurrences1, CT = TRUE,colors =cols)
+p3 <- plot_spectrum(type_occurrences1, CT = TRUE, legend = FALSE,colors =cols)
+```
+
+
+```{r}
+grid.arrange(p1, p2, p3, ncol=3, widths=c(4,4,1.75))
+p1
+p2
+p3
+```
+
+```{r}
+p4 <- plot_spectrum(type_occurrences1, CT = TRUE, legend = TRUE)
+p5 <- plot_spectrum(type_occurrences1, CT=TRUE, legend=TRUE, colors=cols)
+grid.arrange(p4, p5, ncol=2, widths=c(4,4))
+p5
+```
+
+```{r}
+mut_mat <- mut_matrix(vcf_list = vcfs, ref_genome = ref_genome)
+head(mut_mat)
+```
+
+```{r}
+library(RColorBrewer)
+cols6 <- brewer.pal(6, "Pastel2")
+plot_96_profile(mut_mat[,c(1:5)], condensed = TRUE, colors = cols6)
+plot_96_profile(mut_mat[,c(6:10)], condensed = TRUE, colors = cols6)
+plot_96_profile(mut_mat[,c(11:13)], condensed = TRUE, colors = cols6)
+```
+
+```{r}
+#NMF
+mut_mat <- mut_mat + 0.0001
+library("NMF")
+estimate <- nmf(mut_mat, rank=2:5, method="brunet", nrun=10, seed=123456)
+plot(estimate)
+```
+```{r}
+
+sp_url <- paste("https://cancer.sanger.ac.uk/cancergenome/assets/", "signatures_probabilities.txt", sep = "")
+cancer_signatures = read.table(sp_url, sep = "\t", header = TRUE)
+#Match the order of the mutation types to MutationalPatterns standard
+new_order = match(row.names(mut_mat), cancer_signatures$Somatic.Mutation.Type)
+# Reorder cancer signatures dataframe
+cancer_signatures = cancer_signatures[as.vector(new_order),]
+# Add trinucletiode changes names as row.names
+row.names(cancer_signatures) = cancer_signatures$Somatic.Mutation.Type
+# Keep only 96 contributions of the signatures in matrix
+cancer_signatures = as.matrix(cancer_signatures[,4:33])
+plot_96_profile(cancer_signatures[,1:2], condensed = TRUE, ymax = 0.3)
+```
+
+```{r}
+hclust_cosmic = cluster_signatures(cancer_signatures, method = "average")
+# store signatures in new order
+cosmic_order = colnames(cancer_signatures)[hclust_cosmic$order]
+plot(hclust_cosmic)
+```
+
+```{r}
+cos_sim(mut_mat[,1], cancer_signatures[,1])
+cos_sim_samples_signatures = cos_sim_matrix(mut_mat, cancer_signatures)
+# Plot heatmap with specified signature order
+plot_cosine_heatmap(cos_sim_samples_signatures, col_order = cosmic_order, cluster_rows = TRUE)
+```
+
+```{r}
+fit_res <- fit_to_signatures(mut_mat, cancer_signatures)
+# Select signatures with some contribution
+select <- which(rowSums(fit_res$contribution) > 10)
+# Plot contribution barplot
+plot_contribution(fit_res$contribution[select,], cancer_signatures[,select], coord_flip = FALSE, mode = "absolute")
+```
+
+```{r}
+plot_contribution_heatmap(fit_res$contribution, cluster_samples = TRUE, method = "complete")
+```
+
+```{r}
+plot_compare_profiles(mut_mat[,1], fit_res$reconstructed[,1], profile_names = c("Original", "Reconstructed"), condensed = TRUE)
+```
+
+```{r}
+# calculate all pairwise cosine similarities
+cos_sim_ori_rec <- cos_sim_matrix(mut_mat, fit_res$reconstructed)
+# extract cosine similarities per sample between original and reconstructed
+cos_sim_ori_rec <- as.data.frame(diag(cos_sim_ori_rec))
+
+# Adjust data frame for plotting with gpplot
+colnames(cos_sim_ori_rec) = "cos_sim"
+cos_sim_ori_rec$sample = row.names(cos_sim_ori_rec)
+
+# Load ggplot2
+library(ggplot2)
+# Make barplot
+ggplot(cos_sim_ori_rec, aes(y=cos_sim, x=sample)) +
+geom_bar(stat="identity", fill = "skyblue4") +
+coord_cartesian(ylim=c(0.8, 1)) +
+#coord_flip(ylim=c(0.8,1)) +
+ylab("Cosine similarity\n original VS reconstructed") +
+xlab("") +
+# Reverse order of the samples such that first is up
+#xlim(rev(levels(factor(cos_sim_ori_rec$sample)))) +
+theme_bw() +
+theme(panel.grid.minor.y=element_blank(),
+panel.grid.major.y=element_blank()) +
+# Add cut.off line
+geom_hline(aes(yintercept=.95))
+  
+```
+
+```{r}
+BiocManager::install("TxDb.Hsapiens.UCSC.hg19.knownGene")
+library("TxDb.Hsapiens.UCSC.hg19.knownGene")
+genes_hg19 <- genes(TxDb.Hsapiens.UCSC.hg19.knownGene)
+genes_hg19
+```
+
+```{r}
+strand = mut_strand(vcfs[[1]], genes_hg19)
+head(strand, 10)
+```
+
+```{r}
+mut_mat_s <- mut_matrix_stranded(vcfs, ref_genome, genes_hg19)
+mut_mat_s[1:5,1:5]
+```
+
+```{r}
+strand_counts <- strand_occurrences(mut_mat_s)
+head(strand_counts)
+```
+
+```{r}
+strand_bias <- strand_bias_test(strand_counts)
+strand_bias
+```
+
+```{r}
+ps1 <- plot_strand(strand_counts, mode = "relative")
+ps2 <- plot_strand_bias(strand_bias)
+grid.arrange(ps1, ps2)
+ps1
+ps2
+```
+
+```{r}
+###Replicative strand bias analysis###
+repli_file = system.file("extdata/ReplicationDirectionRegions.bed",package = "MutationalPatterns")
+repli_strand = read.table(repli_file, header = TRUE)
+# Store in GRanges object
+repli_strand_granges = GRanges(seqnames = repli_strand$Chr,
+ranges = IRanges(start = repli_strand$Start + 1, end = repli_strand$Stop), strand_info = repli_strand$Class)
+# UCSC seqlevelsstyle
+seqlevelsStyle(repli_strand_granges) = "UCSC"
+repli_strand_granges
+
+#Get replicative strand information for all pos
+strand_rep <- mut_strand(vcfs[[1]], repli_strand_granges, mode = "replication")
+head(strand_rep, 10)
+
+#Make mutation count matrix with transcriptional strand information
+mut_mat_s_rep <- mut_matrix_stranded(vcfs, ref_genome, repli_strand_granges, mode = "replication")
+mut_mat_s_rep[1:5, 1:5]
+
+#Count right before left
+repli_strand_granges$strand_info <- factor(repli_strand_granges$strand_info,levels = c("right", "left"))
+mut_mat_s_rep2 <- mut_matrix_stranded(vcfs, ref_genome, repli_strand_granges,mode = "replication")
+mut_mat_s_rep2[1:5, 1:5]
+
+#Count the number of mutations on each strand per mutation type
+strand_counts_rep <- strand_occurrences(mut_mat_s_rep)
+head(strand_counts)
+
+#Perform Poisson test for strand asymmetry significance testing
+strand_bias_rep <- strand_bias_test(strand_counts_rep)
+strand_bias_rep
+
+#plot
+ps3 <- plot_strand(strand_counts_rep, mode = "relative")
+ps4 <- plot_strand_bias(strand_bias_rep)
+
+grid.arrange(ps1,ps2,ps3, ps4)
+ps3
+ps4
+```
+
+```{r}
+#Extract signatures with stand bias
+nmf_res_strand <- extract_signatures(mut_mat_s, rank = 2)
+# Provide signature names
+colnames(nmf_res_strand$signatures) <- c("Signature A", "Signature B")
+a <- plot_192_profile(nmf_res_strand$signatures, condensed = TRUE)
+b <- plot_signature_strand_bias(nmf_res_strand$signatures)
+grid.arrange(a, b, ncol = 2, widths = c(5, 1.8))
+a
+b
+```
+
+```{r}
+# Define autosomal chromosomes
+chromosomes <- seqnames(get(ref_genome))[1:22]
+# Make a rainfall plot
+for(i in c(1:13)){
+  plota=plot_rainfall(vcfs[[i]], title = names(vcfs[i]),chromosomes = chromosomes, cex = 1.5, ylim = 1e+09)
+  print(plota)}
+
+```
+
+```{r}
+if (!requireNamespace("BiocManager", quietly=TRUE)) install.packages("BiocManager")
+BiocManager::install("biomaRt")
+```
+
+```{r}
+library(biomaRt)
+regulatory <- useEnsembl(biomart="regulation",dataset="hsapiens_regulatory_feature",GRCh = 37)
+# Download the regulatory CTCF binding sites and convert them to a GRanges object.
+CTCF <- getBM(attributes = c('chromosome_name', 'chromosome_start', 'chromosome_end', 'feature_type_name'), filters = "regulatory_feature_type_name", values = "CTCF Binding Site", mart = regulatory)
+CTCF_g <- reduce(GRanges(CTCF$chromosome_name, IRanges(CTCF$chromosome_start,CTCF$chromosome_end)))
+CTCF_g <- readRDS(system.file("states/CTCF_g_data.rds", package="MutationalPatterns"))
+# Download the promoter regions and convert them to a GRanges object.
+promoter = getBM(attributes = c('chromosome_name', 'chromosome_start','chromosome_end', 'feature_type_name'), filters = "regulatory_feature_type_name", values = "Promoter",mart = regulatory)
+promoter_g = reduce(GRanges(promoter$chromosome_name,IRanges(promoter$chromosome_start, promoter$chromosome_end)))
+promoter_g <- readRDS(system.file("states/promoter_g_data.rds",package="MutationalPatterns"))
+# Download the promoter flanking regions and convert them to a GRanges object.
+flanking = getBM(attributes = c('chromosome_name', 'chromosome_start','chromosome_end','feature_type_name'), filters= "regulatory_feature_type_name", values = "Promoter Flanking Region",mart = regulatory)
+flanking_g = reduce(GRanges(flanking$chromosome_name, IRanges(flanking$chromosome_start, flanking$chromosome_end)))
+flanking_g <- readRDS(system.file("states/promoter_flanking_g_data.rds", package="MutationalPatterns"))
+#Combine all genomic regions (GRanges objects) in a named list
+regions <- GRangesList(promoter_g, flanking_g, CTCF_g)
+names(regions) <- c("Promoter", "Promoter flanking", "CTCF")
+seqlevelsStyle(regions) <- "UCSC"
+```
+
+```{r}
+# Get the filename with surveyed/callable regions
+surveyed_file <- system.file("extdata/callableloci-sample.bed",package = "MutationalPatterns")
+# Import the file using rtracklayer and use the UCSC naming standard
+library(rtracklayer)
+surveyed <- import(surveyed_file)
+seqlevelsStyle(surveyed) <- "UCSC"
+# For this example we use the same surveyed file for each sample.
+surveyed_list <- rep(list(surveyed), 13)
+# Calculate the number of observed and expected number of mutations in each genomic regions for each sample.
+distr <- genomic_distribution(vcfs, surveyed_list, regions)
+# Perform the enrichment/depletion test by tissue type.
+distr_test <- enrichment_depletion_test(distr)
+head(distr_test)
+plot_enrichment_depletion(distr_test)
+```
+
