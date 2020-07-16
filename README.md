@@ -1,7 +1,13 @@
 # Pipeline
 
 ## Prerequisite
+
 - Python >= 3.5
+
+## Usage
+
+- `run_mutect2.sh`
+  - An example is available [here](https://github.com/Jacob-s-Lab/CML/blob/12fc6b5071c5f747f1b90fe295d90410bc3f47c6/somatic_run.sh).
 
 ## Download Data
 
