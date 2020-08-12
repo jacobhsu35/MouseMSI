@@ -24,7 +24,7 @@ NORMAL_ID=$6
 OUTPUT_PATH=$7
 REF_GENOME_PATH=$8
 HUMAN_DBSNP_PATH=$9
-INTERVAL=${10}
+BED=${10}
 #GERMLINE_RESOURCE_PATH=${10}
 #GERMLINE_RESOURCE_FOR_PILEUP_PATH=${11}
 
@@ -37,7 +37,7 @@ INTERVAL=${10}
 NUM_THREAD=10
 
 mkdir -p $OUTPUT_PATH
-
+cd $OUTPUT_PATH
 if [[ $NORMAL_FASTQ_1_PATH == *.fastq.gz ]] || [[ $NORMAL_FASTQ_1_PATH == *.fastq ]]
 then
     # for Tumor samples
@@ -177,8 +177,8 @@ $GATK_PATH/gatk --java-options "-Xmx40G" GetSampleName -I $OUTPUT_PATH/${NORMAL_
 TUMOR_SAMPLE_NAME=$(cat $OUTPUT_PATH/${TUMOR_ID}_sample_name.txt)
 NORMAL_SAMPLE_NAME=$(cat $OUTPUT_PATH/${NORMAL_ID}_sample_name.txt)
 
-java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam o=${TUMOR_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${INTERVAL} TARGET_INTERVALS=${INTERVAL} > $TUMOR_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
-java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam o=${NORMAL_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${INTERVAL} TARGET_INTERVALS=${INTERVAL} > $NORMAL_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
+java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam o=${TUMOR_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BED} TARGET_INTERVALS=${BED} > $TUMOR_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
+java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam o=${NORMAL_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BED} TARGET_INTERVALS=${BED} > $NORMAL_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
 
 ### Call somatic short variants and generate a BAM with Mutect2
 
@@ -195,6 +195,7 @@ $GATK_PATH/gatk --java-options "-Xmx40G" Mutect2 \
  --f1r2-tar-gz $OUTPUT_PATH/f1r2.tar.gz \
  --native-pair-hmm-threads $NUM_THREAD \
  --create-output-bam-md5 true \
+ -L ${BED} \
  -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log 2>&1
 # -germline-resource $GERMLINE_RESOURCE_PATH \  https://gatk.broadinstitute.org/hc/en-us/community/posts/360056904972-JAVA-errors-from-gnomad-resource-in-Mutect2
 
@@ -219,28 +220,32 @@ $GATK_PATH/gatk --java-options "-Xmx40G" Mutect2 \
 #    --ob-priors $OUTPUT_PATH/read-orientation-model.tar.gz \
 #    -O $OUTPUT_PATH/filtered.vcf > $OUTPUT_PATH/filter_mutect_calls.log 2>&1
 
+gzip -d $OUTPUT_PATH/Mutect2.vcf.gz
+VT_PATH=/project/GP1/u3710062/AI_SHARE/software/vt-0.57721
+$VT_PATH/vt decompose -s -o Mutect2.decom.vcf Mutect2.vcf
+$VT_PATH/vt normalize -o Mutect2.norm.vcf -r $REF_GENOME_PATH Mutect2.decom.vcf
 
 $GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
         -R $REF_GENOME_PATH \
-        -V $OUTPUT_PATH/Mutect2.vcf.gz \
+        -V $OUTPUT_PATH/Mutect2.norm.vcf \
         --select-type-to-include SNP \
-        -O $OUTPUT_PATH/Mutect2.snp.vcf.gz
+        -O $OUTPUT_PATH/Mutect2.norm.snp.vcf.gz
 
 $GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
         -R $REF_GENOME_PATH \
-        -V $OUTPUT_PATH/Mutect2.vcf.gz \
+        -V $OUTPUT_PATH/Mutect2.norm.vcf \
         --select-type-to-include INDEL \
-        -O $OUTPUT_PATH/Mutect2.indel.vcf.gz
+        -O $OUTPUT_PATH/Mutect2.norm.indel.vcf.gz
 
 
-cd $OUTPUT_PATH
+#cd $OUTPUT_PATH
 
-$SVABA_PATH/svaba run -t $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam -n $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam -G $REF_GENOME_PATH -a somatic_run -p $NUM_THREAD -D /project/GP1/u3710062/AI_SHARE/reference/GRCm38_dbSNP/00-All.vcf.gz 
+#$SVABA_PATH/svaba run -t $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam -n $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam -G $REF_GENOME_PATH -a somatic_run -p $NUM_THREAD -D /project/GP1/u3710062/AI_SHARE/reference/GRCm38_dbSNP/00-All.vcf.gz 
 
-SVABA_INDEL_VCF_PATH=$OUTPUT_PATH/somatic_run.svaba.somatic.indel.vcf
+#SVABA_INDEL_VCF_PATH=$OUTPUT_PATH/somatic_run.svaba.somatic.indel.vcf
 
-$BCFTOOLS_PATH/bcftools view $SVABA_INDEL_VCF_PATH -Oz -o $OUTPUT_PATH/svaba.indel.vcf.gz
-$BCFTOOLS_PATH/bcftools index $OUTPUT_PATH/svaba.indel.vcf.gz
+#$BCFTOOLS_PATH/bcftools view $SVABA_INDEL_VCF_PATH -Oz -o $OUTPUT_PATH/svaba.indel.vcf.gz
+#$BCFTOOLS_PATH/bcftools index $OUTPUT_PATH/svaba.indel.vcf.gz
 
-$BCFTOOLS_PATH/bcftools isec -n=2 $OUTPUT_PATH/Mutect2.indel.vcf.gz $OUTPUT_PATH/svaba.indel.vcf.gz -w 1 -Oz -o $OUTPUT_PATH/consensus.indel.vcf.gz
+#$BCFTOOLS_PATH/bcftools isec -n=2 $OUTPUT_PATH/Mutect2.indel.vcf.gz $OUTPUT_PATH/svaba.indel.vcf.gz -w 1 -Oz -o $OUTPUT_PATH/consensus.indel.vcf.gz
 

@@ -64,18 +64,15 @@ NORMAL_ID='${i}'
 OUTPUT_PATH='${wkdir}'
 REF_GENOME_PATH='${Ref}'
 HUMAN_DBSNP_PATH='${DBSNP}'
-INTERVAL='${BED}'
+BED='${BED}'
 	' > ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
 	### To add GATK preprocess and Mutect2 -L
 	tail -n +37 ${SCRIPT_PATH}/run_mutect2.sh >> ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
-	sed -i -e '190d' ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
-	sed -i '189a\ -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log 2>&1' ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
-	sed -i '189a\ -L ${INTERVAL}\ \\' ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
 	chmod 755 ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
 #	qsub ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
 #	sleep 10s
 	done
- done</project/GP1/u3710062/AI_SHARE/GATK/Outputs/20200507_MouseMSI/MouseMSI/Mouse_MSI_TN_table.txt
+done</project/GP1/u3710062/AI_SHARE/GATK/Outputs/20200507_MouseMSI/MouseMSI/Mouse_MSI_TN_table.txt
 #$SCRIPT_PATH/run_mutect2.sh  \
 #	$INPUT_FILE_DIR/*_sample/SKLS518-thymus_*_R1_001.fastq.gz \
 #	$INPUT_FILE_DIR/SKLS518-thymus_*_R2_001.fastq.gz \
