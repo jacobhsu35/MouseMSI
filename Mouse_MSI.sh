@@ -68,9 +68,11 @@ BED='${BED}'
 	' > ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
 	### To add GATK preprocess and Mutect2 -L
 	tail -n +37 ${SCRIPT_PATH}/run_mutect2.sh >> ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
+        ### To add VEP
+	tail -n +11 ${SCRIPT_PATH}/run_vep.sh >> ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
 	chmod 755 ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
-#	qsub ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
-#	sleep 10s
+	qsub ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
+	sleep 10s
 	done
 done</project/GP1/u3710062/AI_SHARE/GATK/Outputs/20200507_MouseMSI/MouseMSI/Mouse_MSI_TN_table.txt
 #$SCRIPT_PATH/run_mutect2.sh  \
