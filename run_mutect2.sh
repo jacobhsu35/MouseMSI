@@ -177,8 +177,8 @@ $GATK_PATH/gatk --java-options "-Xmx40G" GetSampleName -I $OUTPUT_PATH/${NORMAL_
 TUMOR_SAMPLE_NAME=$(cat $OUTPUT_PATH/${TUMOR_ID}_sample_name.txt)
 NORMAL_SAMPLE_NAME=$(cat $OUTPUT_PATH/${NORMAL_ID}_sample_name.txt)
 
-java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam o=${TUMOR_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BED} TARGET_INTERVALS=${BED} > $TUMOR_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
-java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam o=${NORMAL_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BED} TARGET_INTERVALS=${BED} > $NORMAL_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
+java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam o=$OUTPUT_PATH/${TUMOR_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BED} TARGET_INTERVALS=${BED} > $TUMOR_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
+java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam o=$OUTPUT_PATH/${NORMAL_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BED} TARGET_INTERVALS=${BED} > $NORMAL_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
 
 ### Call somatic short variants and generate a BAM with Mutect2
 
@@ -216,7 +216,7 @@ $GATK_PATH/gatk --java-options "-Xmx40G" FilterMutectCalls \
     -R $REF_GENOME_PATH \
     -V $OUTPUT_PATH/Mutect2.vcf.gz \
     -O $OUTPUT_PATH/Mutect2.filtered.vcf.gz \
-    --min-allele-fraction 0.1 \
+    --min-allele-fraction 0.01 \
     --unique-alt-read-count 10 > $OUTPUT_PATH/filter_mutect_calls.log 2>&1
 #    --tumor-segmentation $OUTPUT_PATH/${TUMOR_ID}_segments.table \
 #    --contamination-table $OUTPUT_PATH/contamination.table \
