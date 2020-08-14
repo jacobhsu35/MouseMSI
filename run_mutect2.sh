@@ -212,17 +212,19 @@ $GATK_PATH/gatk --java-options "-Xmx40G" Mutect2 \
 #    -tumor-segmentation $OUTPUT_PATH/${TUMOR_ID}_segments.table \
 #    -O $OUTPUT_PATH/contamination.table > $OUTPUT_PATH/calculate_contamination.log 2>&1
 
-#$GATK_PATH/gatk --java-options "-Xmx40G" FilterMutectCalls \
-#    -R $REF_GENOME_PATH \
-#    -V $OUTPUT_PATH/Mutect2.vcf.gz \
+$GATK_PATH/gatk --java-options "-Xmx40G" FilterMutectCalls \
+    -R $REF_GENOME_PATH \
+    -V $OUTPUT_PATH/Mutect2.vcf.gz \
+    -O $OUTPUT_PATH/Mutect2.filtered.vcf.gz \
+    --min-allele-fraction 0.1 \
+    --unique-alt-read-count 10 > $OUTPUT_PATH/filter_mutect_calls.log 2>&1
 #    --tumor-segmentation $OUTPUT_PATH/${TUMOR_ID}_segments.table \
 #    --contamination-table $OUTPUT_PATH/contamination.table \
 #    --ob-priors $OUTPUT_PATH/read-orientation-model.tar.gz \
-#    -O $OUTPUT_PATH/filtered.vcf > $OUTPUT_PATH/filter_mutect_calls.log 2>&1
 
-gzip -d $OUTPUT_PATH/Mutect2.vcf.gz
+gzip -d $OUTPUT_PATH/Mutect2.filtered.vcf.gz
 VT_PATH=/project/GP1/u3710062/AI_SHARE/software/vt-0.57721
-$VT_PATH/vt decompose -s -o Mutect2.decom.vcf Mutect2.vcf
+$VT_PATH/vt decompose -s -o Mutect2.decom.vcf Mutect2.filtered.vcf
 $VT_PATH/vt normalize -o Mutect2.norm.vcf -r $REF_GENOME_PATH Mutect2.decom.vcf
 
 $GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
@@ -237,6 +239,11 @@ $GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
         --select-type-to-include INDEL \
         -O $OUTPUT_PATH/Mutect2.norm.indel.vcf.gz
 
+$GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
+        -R $REF_GENOME_PATH \
+        -V $OUTPUT_PATH/Mutect2.norm.vcf \
+        --exclude-filtered true \
+        -O $OUTPUT_PATH/Mutect2.norm.PASS.vcf.gz
 
 #cd $OUTPUT_PATH
 
