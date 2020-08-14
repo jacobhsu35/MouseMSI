@@ -11,20 +11,21 @@ module load biology/Perl/default
 INPUT_VCF_PATH=$1
 OUTPUT_VCF_PATH=$2
 
-$VEP_PATH/vep --assembly GRCh37 --database \
+$VEP_PATH/vep --species mus_musculus --assembly GRCm38 --database \
     --port 3337 \
     --dir_plugins $VEP_PLUGIN_DIR \
     -i $INPUT_VCF_PATH \
     --vcf \
     -o $OUTPUT_VCF_PATH \
     --check_existing \
-    --plugin LoFtool,$VEP_PLUGIN_DIR/LoFtool_scores.txt \
-    --plugin ExACpLI,$VEP_PLUGIN_DIR/ExACpLI_values.txt \
-    --plugin MPC,$VEP_PLUGIN_DATA_DIR/fordist_constraint_official_mpc_values_v2.txt.gz \
-    --plugin LOVD \
-    --plugin FlagLRG,$VEP_PLUGIN_DATA_DIR/list_LRGs_transcripts_xrefs.txt \
-    --plugin FunMotifs,$VEP_PLUGIN_DATA_DIR/blood.funmotifs_sorted.bed.gz,fscore,dnase_seq \
-    --plugin PostGAP,$VEP_PLUGIN_DATA_DIR/postgap_GRCh37.txt.gz,ALL \
-    --plugin satMutMPRA,file=$VEP_PLUGIN_DATA_DIR/satMutMPRA_GRCh37_ALL.gz,cols=ALL \
-    --fork 4
+    --everything
+#    --plugin LoFtool,$VEP_PLUGIN_DIR/LoFtool_scores.txt \
+#    --plugin ExACpLI,$VEP_PLUGIN_DIR/ExACpLI_values.txt \
+#    --plugin MPC,$VEP_PLUGIN_DATA_DIR/fordist_constraint_official_mpc_values_v2.txt.gz \
+#    --plugin LOVD \
+#    --plugin FlagLRG,$VEP_PLUGIN_DATA_DIR/list_LRGs_transcripts_xrefs.txt \
+#    --plugin FunMotifs,$VEP_PLUGIN_DATA_DIR/blood.funmotifs_sorted.bed.gz,fscore,dnase_seq \
+#    --plugin PostGAP,$VEP_PLUGIN_DATA_DIR/postgap_GRCh37.txt.gz,ALL \
+#    --plugin satMutMPRA,file=$VEP_PLUGIN_DATA_DIR/satMutMPRA_GRCh37_ALL.gz,cols=ALL \
+#    --fork 4
 
