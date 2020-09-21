@@ -24,7 +24,8 @@ NORMAL_ID=$6
 OUTPUT_PATH=$7
 REF_GENOME_PATH=$8
 HUMAN_DBSNP_PATH=$9
-BED=${10}
+BAIT=${10}
+TARGET=${11}
 #GERMLINE_RESOURCE_PATH=${10}
 #GERMLINE_RESOURCE_FOR_PILEUP_PATH=${11}
 
@@ -177,8 +178,8 @@ $GATK_PATH/gatk --java-options "-Xmx40G" GetSampleName -I $OUTPUT_PATH/${NORMAL_
 TUMOR_SAMPLE_NAME=$(cat $OUTPUT_PATH/${TUMOR_ID}_sample_name.txt)
 NORMAL_SAMPLE_NAME=$(cat $OUTPUT_PATH/${NORMAL_ID}_sample_name.txt)
 
-java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam o=$OUTPUT_PATH/${TUMOR_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BED} TARGET_INTERVALS=${BED} > $TUMOR_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
-java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam o=$OUTPUT_PATH/${NORMAL_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BED} TARGET_INTERVALS=${BED} > $NORMAL_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
+java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam o=$OUTPUT_PATH/${TUMOR_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BAIT} TARGET_INTERVALS=${TARGET} > $TUMOR_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
+java -jar $PICARD_PATH CollectHsMetrics I=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam o=$OUTPUT_PATH/${NORMAL_SAMPLE_NAME}.metrics.txt R=${REF_GENOME_PATH} BAIT_INTERVALS=${BAIT} TARGET_INTERVALS=${TARGET} > $NORMAL_SAMPLE_NAME"_"collecthsmetrics.log 2>&1
 
 ### Call somatic short variants and generate a BAM with Mutect2
 
@@ -195,7 +196,7 @@ $GATK_PATH/gatk --java-options "-Xmx40G" Mutect2 \
  --f1r2-tar-gz $OUTPUT_PATH/f1r2.tar.gz \
  --native-pair-hmm-threads $NUM_THREAD \
  --create-output-bam-md5 true \
- -L ${BED} \
+ -L ${TARGET} \
  -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log 2>&1
 # -germline-resource $GERMLINE_RESOURCE_PATH \  https://gatk.broadinstitute.org/hc/en-us/community/posts/360056904972-JAVA-errors-from-gnomad-resource-in-Mutect2
 
