@@ -10,8 +10,8 @@
   - An example is available [here](https://github.com/Jacob-s-Lab/CML/blob/12fc6b5071c5f747f1b90fe295d90410bc3f47c6/somatic_run.sh).
 
 ## Capture regions
-Bait:cl7_cMNR-panel_regions_cons.bed
-Target:cl7_cMNR-panel_capture_targets.bed  
+- Bait:cl7_cMNR-panel_regions_cons.bed  
+- Target:cl7_cMNR-panel_capture_targets.bed  
 
 MouseMSI_location_whole_exons.bed is from `/Users/jacob_imac/Nextcloud/TAIWAN/NTU_research/DISEASES/Mouse_MSI/From_PI/sample\ list\ and\ locations.xlsx`
 
