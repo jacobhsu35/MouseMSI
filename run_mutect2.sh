@@ -199,7 +199,7 @@ $GATK_PATH/gatk --java-options "-Xmx40G" Mutect2 \
  -L ${TARGET} \
  -bamout $OUTPUT_PATH/Mutect2.bam > $OUTPUT_PATH/mutect2.log 2>&1
 # -germline-resource $GERMLINE_RESOURCE_PATH \  https://gatk.broadinstitute.org/hc/en-us/community/posts/360056904972-JAVA-errors-from-gnomad-resource-in-Mutect2
-
+#	-minimum-allele-fraction: Lower bound of variant allele fractions to consider when calculating variant LOD
 #$GATK_PATH/gatk --java-options "-Xmx40G" LearnReadOrientationModel -I $OUTPUT_PATH/f1r2.tar.gz -O $OUTPUT_PATH/read-orientation-model.tar.gz
 
 #$GATK_PATH/gatk --java-options "-Xmx40G" GetPileupSummaries \
@@ -222,7 +222,8 @@ $GATK_PATH/gatk --java-options "-Xmx40G" FilterMutectCalls \
 #    --tumor-segmentation $OUTPUT_PATH/${TUMOR_ID}_segments.table \
 #    --contamination-table $OUTPUT_PATH/contamination.table \
 #    --ob-priors $OUTPUT_PATH/read-orientation-model.tar.gz \
-
+#	--min-allele-fraction: Minimum allele fraction over 0.01 would be considered as variant
+#	--unique-alt-read-count: Minimum unique (i.e. deduplicated) reads supporting the alternate allele, only vairant with unique alt read over 10 would be considered
 gzip -d $OUTPUT_PATH/Mutect2.filtered.vcf.gz
 VT_PATH=/project/GP1/u3710062/AI_SHARE/software/vt-0.57721
 $VT_PATH/vt decompose -s -o Mutect2.decom.vcf Mutect2.filtered.vcf
@@ -245,15 +246,5 @@ $GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
         -V $OUTPUT_PATH/Mutect2.norm.vcf \
         --exclude-filtered true \
         -O $OUTPUT_PATH/Mutect2.norm.PASS.vcf.gz
-
-#cd $OUTPUT_PATH
-
-#$SVABA_PATH/svaba run -t $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam -n $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam -G $REF_GENOME_PATH -a somatic_run -p $NUM_THREAD -D /project/GP1/u3710062/AI_SHARE/reference/GRCm38_dbSNP/00-All.vcf.gz 
-
-#SVABA_INDEL_VCF_PATH=$OUTPUT_PATH/somatic_run.svaba.somatic.indel.vcf
-
-#$BCFTOOLS_PATH/bcftools view $SVABA_INDEL_VCF_PATH -Oz -o $OUTPUT_PATH/svaba.indel.vcf.gz
-#$BCFTOOLS_PATH/bcftools index $OUTPUT_PATH/svaba.indel.vcf.gz
-
-#$BCFTOOLS_PATH/bcftools isec -n=2 $OUTPUT_PATH/Mutect2.indel.vcf.gz $OUTPUT_PATH/svaba.indel.vcf.gz -w 1 -Oz -o $OUTPUT_PATH/consensus.indel.vcf.gz
+#	--exclude-filtered: only PASS or "." variants would be included
 
