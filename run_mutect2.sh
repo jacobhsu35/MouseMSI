@@ -189,7 +189,7 @@ $GATK_PATH/gatk --java-options "-Xmx40G" Mutect2 \
  -I $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam \
  -tumor $TUMOR_SAMPLE_NAME \
  -normal $NORMAL_SAMPLE_NAME \
- -O $OUTPUT_PATH/Mutect2.vcf.gz \
+ -O $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.vcf.gz \
  -minimum-allele-fraction 0.1 \
  -enable-all-annotations true \
  --annotations-to-exclude UniqueAltReadCount \
@@ -215,8 +215,8 @@ $GATK_PATH/gatk --java-options "-Xmx40G" Mutect2 \
 
 $GATK_PATH/gatk --java-options "-Xmx40G" FilterMutectCalls \
     -R $REF_GENOME_PATH \
-    -V $OUTPUT_PATH/Mutect2.vcf.gz \
-    -O $OUTPUT_PATH/Mutect2.filtered.vcf.gz \
+    -V $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.vcf.gz \
+    -O $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.filtered.vcf.gz \
     --min-allele-fraction 0.01 \
     --unique-alt-read-count 10 > $OUTPUT_PATH/filter_mutect_calls.log 2>&1
 #    --tumor-segmentation $OUTPUT_PATH/${TUMOR_ID}_segments.table \
@@ -224,27 +224,79 @@ $GATK_PATH/gatk --java-options "-Xmx40G" FilterMutectCalls \
 #    --ob-priors $OUTPUT_PATH/read-orientation-model.tar.gz \
 #	--min-allele-fraction: Minimum allele fraction over 0.01 would be considered as variant
 #	--unique-alt-read-count: Minimum unique (i.e. deduplicated) reads supporting the alternate allele, only vairant with unique alt read over 10 would be considered
-gzip -d $OUTPUT_PATH/Mutect2.filtered.vcf.gz
+gzip -d $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.filtered.vcf.gz
 VT_PATH=/project/GP1/u3710062/AI_SHARE/software/vt-0.57721
-$VT_PATH/vt decompose -s -o Mutect2.decom.vcf Mutect2.filtered.vcf
-$VT_PATH/vt normalize -o Mutect2.norm.vcf -r $REF_GENOME_PATH Mutect2.decom.vcf
+$VT_PATH/vt decompose -s -o ${TUMOR_ID}_${NORMAL_ID}_Mutect2.decom.vcf ${TUMOR_ID}_${NORMAL_ID}_Mutect2.filtered.vcf
+$VT_PATH/vt normalize -o ${TUMOR_ID}_${NORMAL_ID}_Mutect2.norm.vcf -r $REF_GENOME_PATH ${TUMOR_ID}_${NORMAL_ID}_Mutect2.decom.vcf
 
 $GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
         -R $REF_GENOME_PATH \
-        -V $OUTPUT_PATH/Mutect2.norm.vcf \
+        -V $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.norm.vcf \
         --select-type-to-include SNP \
-        -O $OUTPUT_PATH/Mutect2.norm.snp.vcf.gz
+        -O $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.norm.snp.vcf.gz
 
 $GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
         -R $REF_GENOME_PATH \
-        -V $OUTPUT_PATH/Mutect2.norm.vcf \
+        -V $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.norm.vcf \
         --select-type-to-include INDEL \
-        -O $OUTPUT_PATH/Mutect2.norm.indel.vcf.gz
+        -O $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.norm.indel.vcf.gz
 
 $GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
         -R $REF_GENOME_PATH \
-        -V $OUTPUT_PATH/Mutect2.norm.vcf \
+        -V $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.norm.vcf \
         --exclude-filtered true \
-        -O $OUTPUT_PATH/Mutect2.norm.PASS.vcf.gz
+        -O $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.norm.PASS.vcf.gz
 #	--exclude-filtered: only PASS or "." variants would be included
+#===============================================================================================================================================================================
+### Call variant by HapltypeCaller
+$GATK_PATH/gatk HaplotypeCaller \
+         -R $REF_GENOME_PATH \
+         -I $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam \
+         -ERC GVCF \
+         --dbsnp $HUMAN_DBSNP_PATH \
+         -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz 
 
+$GATK_PATH/gatk GenotypeGVCFs \
+         -R $REF_GENOME_PATH \
+         -V $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz \
+         -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz
+
+$GATK_PATH/gatk VariantFiltration \
+         -R $REF_GENOME_PATH \
+         --variant $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz \
+         -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.vcf.gz \
+         --cluster-window-size 10 \
+         --filter-expression "DP < 10" \
+         --filter-name "LowCoverage" \
+         --filter-expression "QUAL < 30.0" \
+         --filter-name "VeryLowQual" \
+         --filter-expression "QUAL > 30.0 && QUAL < 50.0" \
+         --filter-name "LowQual" \
+         --filter-expression "QD < 1.5" \
+         --filter-name "LowQD"
+
+$GATK_PATH/gatk HaplotypeCaller \
+         -R $REF_GENOME_PATH \
+         -I $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam \
+         -ERC GVCF \
+         --dbsnp $HUMAN_DBSNP_PATH \
+         -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz
+
+$GATK_PATH/gatk GenotypeGVCFs \
+         -R $REF_GENOME_PATH \
+         -V $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz \
+         -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz
+
+$GATK_PATH/gatk VariantFiltration \
+         -R $REF_GENOME_PATH \
+         --variant $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz \
+         -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.vcf.gz \
+         --cluster-window-size 10 \
+         --filter-expression "DP < 10" \
+         --filter-name "LowCoverage" \
+         --filter-expression "QUAL < 30.0" \
+         --filter-name "VeryLowQual" \
+         --filter-expression "QUAL > 30.0 && QUAL < 50.0" \
+         --filter-name "LowQual" \
+         --filter-expression "QD < 1.5" \
+         --filter-name "LowQD"
