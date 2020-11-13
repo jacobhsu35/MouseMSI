@@ -190,7 +190,6 @@ $GATK_PATH/gatk --java-options "-Xmx40G" Mutect2 \
  -tumor $TUMOR_SAMPLE_NAME \
  -normal $NORMAL_SAMPLE_NAME \
  -O $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.vcf.gz \
- -minimum-allele-fraction 0.1 \
  -enable-all-annotations true \
  --annotations-to-exclude UniqueAltReadCount \
  --f1r2-tar-gz $OUTPUT_PATH/f1r2.tar.gz \
@@ -218,7 +217,7 @@ $GATK_PATH/gatk --java-options "-Xmx40G" FilterMutectCalls \
     -V $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.vcf.gz \
     -O $OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.filtered.vcf.gz \
     --min-allele-fraction 0.01 \
-    --unique-alt-read-count 10 > $OUTPUT_PATH/filter_mutect_calls.log 2>&1
+    --unique-alt-read-count 20 > $OUTPUT_PATH/filter_mutect_calls.log 2>&1
 #    --tumor-segmentation $OUTPUT_PATH/${TUMOR_ID}_segments.table \
 #    --contamination-table $OUTPUT_PATH/contamination.table \
 #    --ob-priors $OUTPUT_PATH/read-orientation-model.tar.gz \
