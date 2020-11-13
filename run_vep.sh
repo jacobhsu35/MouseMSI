@@ -18,7 +18,7 @@ export PATH=$HTSLIB_PATH:$PATH
 module load biology/Perl/default
 # Don't need to run vt, since the test example is known to be fine
 
-INPUT_VCF_PATH=$OUTPUT_PATH/Mutect2.norm.PASS.vcf.gz
+INPUT_VCF_PATH=$OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.vcf.gz
 OUTPUT_VCF_PATH=$OUTPUT_PATH/VEP_${TUMOR_ID}_${NORMAL_ID}
 
 $VEP_PATH/vep --cache --offline \
