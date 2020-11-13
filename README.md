@@ -43,7 +43,7 @@ MouseMSI_location_whole_exons.bed is from:
 - `Calculate_MSI_change.sh`
   - To count the number of mutations
     - VCF=           Mutect2.vcf.gz			# Mutect2 default output
-    - FilterVCF=     Mutect2.filtered.vcf.gz		# Filtered VCF
+    - FilterVCF=     Mutect2.filtered.vcf.gz		# Filtered VCF (--min-allele-fraction 0.01 ; --unique-alt-read-count 20)
     - NormVCF=       Mutect2.norm.vcf			# Normalized VCF
     - NormVCF_SNP=   Mutect2.norm.snp.vcf.gz	   	# Normalized VCF (SNP)
     - NormVCF_INDEL= Mutect2.norm.indel.vcf.gz	 	# Normalized VCF (INDEL)
