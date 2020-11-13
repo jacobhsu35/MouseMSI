@@ -75,7 +75,7 @@ while read -r Tumor Ctrl_1 Ctrl_2 Ctrl_3 Ctrl_4 Ctrl_5 Ctrl_6 Ctrl_7;
 	qsub ${wkdir}/run_${Tumor}_${Ctrl_1}_mutect2.sh
 	sleep 10s
 	done
-done</project/GP1/u3710062/AI_SHARE/GATK/Outputs/20200507_MouseMSI/MouseMSI/Mouse_MSI_TN_table.txt
+done</project/GP1/u3710062/AI_SHARE/GATK/Outputs/20200507_MouseMSI/MouseMSI/INPUT/Mouse_MSI_TN_table.txt
 #$SCRIPT_PATH/run_mutect2.sh  \
 #	$INPUT_FILE_DIR/*_sample/SKLS518-thymus_*_R1_001.fastq.gz \
 #	$INPUT_FILE_DIR/SKLS518-thymus_*_R2_001.fastq.gz \
