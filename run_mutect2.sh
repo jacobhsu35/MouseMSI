@@ -248,17 +248,20 @@ $GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
 #	--exclude-filtered: only PASS or "." variants would be included
 #===============================================================================================================================================================================
 ### Call variant by HapltypeCaller
+## Tumor
 $GATK_PATH/gatk HaplotypeCaller \
          -R $REF_GENOME_PATH \
          -I $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.bam \
          -ERC GVCF \
          --dbsnp $HUMAN_DBSNP_PATH \
-         -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz 
+         -L ${TARGET} \
+	 -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz 
 
 $GATK_PATH/gatk GenotypeGVCFs \
          -R $REF_GENOME_PATH \
          -V $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz \
-         -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz
+         -L ${TARGET} \
+	 -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz
 
 $GATK_PATH/gatk VariantFiltration \
          -R $REF_GENOME_PATH \
@@ -274,17 +277,41 @@ $GATK_PATH/gatk VariantFiltration \
          --filter-expression "QD < 1.5" \
          --filter-name "LowQD"
 
+gzip -d $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.vcf.gz 
+$VT_PATH/vt decompose -s -o ${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.decom.vcf ${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.vcf
+$VT_PATH/vt normalize -o ${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf -r $REF_GENOME_PATH ${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.decom.vcf
+
+$GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
+        -R $REF_GENOME_PATH \
+        -V $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf \
+        --select-type-to-include SNP \
+        -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.Snp.norm.vcf.gz
+
+$GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
+        -R $REF_GENOME_PATH \
+        -V $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf \
+        --select-type-to-include INDEL \
+        -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.Indel.norm.vcf.gz
+
+$GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
+        -R $REF_GENOME_PATH \
+        -V $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf \
+        --exclude-filtered true \
+        -O $OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.PASS.vcf.gz
+## Normal
 $GATK_PATH/gatk HaplotypeCaller \
          -R $REF_GENOME_PATH \
          -I $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.bam \
          -ERC GVCF \
          --dbsnp $HUMAN_DBSNP_PATH \
-         -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz
+         -L ${TARGET} \
+	 -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz
 
 $GATK_PATH/gatk GenotypeGVCFs \
          -R $REF_GENOME_PATH \
          -V $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.g.vcf.gz \
-         -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz
+         -L ${TARGET} \
+	 -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz
 
 $GATK_PATH/gatk VariantFiltration \
          -R $REF_GENOME_PATH \
@@ -299,3 +326,25 @@ $GATK_PATH/gatk VariantFiltration \
          --filter-name "LowQual" \
          --filter-expression "QD < 1.5" \
          --filter-name "LowQD"
+
+gzip -d $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.vcf.gz
+$VT_PATH/vt decompose -s -o ${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.decom.vcf ${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.vcf
+$VT_PATH/vt normalize -o ${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf -r $REF_GENOME_PATH ${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.decom.vcf
+
+$GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
+        -R $REF_GENOME_PATH \
+        -V $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf \
+        --select-type-to-include SNP \
+        -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.Snp.norm.vcf.gz
+
+$GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
+        -R $REF_GENOME_PATH \
+        -V $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf \
+        --select-type-to-include INDEL \
+        -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.Indel.norm.vcf.gz
+
+$GATK_PATH/gatk --java-options "-Xmx40G" SelectVariants \
+        -R $REF_GENOME_PATH \
+        -V $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf \
+        --exclude-filtered true \
+        -O $OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.PASS.vcf.gz
