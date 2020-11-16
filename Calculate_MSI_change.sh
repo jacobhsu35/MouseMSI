@@ -1,11 +1,14 @@
 #!/bin/bash
 
+TODAY=`date +%Y%m%d`
 DIR=/project/GP1/u3710062/AI_SHARE/GATK/Outputs/20200507_MouseMSI/
 INPUT_FILE_DIR=/project/GP1/u3710062/AI_SHARE/rawdata/Mouse_MSI/
+OUTPUT=${DIR}/mut_ratio/${TODAY}_TN_pair.txt
 
 mkdir -p ${DIR}/mut_ratio
 
-echo 'Pair VCF FilterVCF NormVCF NormVCF_SNP NormVCF_INDEL PASS_VCF' > ${DIR}/mut_ratio/TN_pair.txt
+
+echo 'Pair VCF FilterVCF NormVCF NormVCF_SNP NormVCF_INDEL PASS_VCF' > ${OUTPUT}
 
 while read -r Tumor Ctrl_1 Ctrl_2 Ctrl_3 Ctrl_4 Ctrl_5 Ctrl_6 Ctrl_7;
  do
@@ -36,6 +39,6 @@ while read -r Tumor Ctrl_1 Ctrl_2 Ctrl_3 Ctrl_4 Ctrl_5 Ctrl_6 Ctrl_7;
 	NormVCF_INDEL_N=`zgrep "BaseQRankSum=" $NormVCF_INDEL | wc | awk '{print $1}'`
 	PASS_VCF_N=`zgrep "BaseQRankSum=" $PASS_VCF | wc | awk '{print $1}'`
 	Count="${Tumor}_${i} ${VCF_N} ${FilterVCF_N} ${NormVCF_N} ${NormVCF_SNP_N} ${NormVCF_INDEL_N} ${PASS_VCF_N}"
-	echo "${Count}" >> ${DIR}/mut_ratio/${TODAY}_TN_pair.txt
+	echo "${Count}" >> ${OUTPUT}
 	done
  done</project/GP1/u3710062/AI_SHARE/GATK/Outputs/20200507_MouseMSI/MouseMSI/INPUT/Mouse_MSI_TN_table.txt
