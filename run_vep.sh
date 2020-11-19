@@ -18,22 +18,27 @@ export PATH=$HTSLIB_PATH:$PATH
 module load biology/Perl/default
 # Don't need to run vt, since the test example is known to be fine
 
-INPUT_VCF_PATH=$OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.vcf.gz
+M_VCF=$OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.vcf.gz
+M_VCF_F_Norm=$OUTPUT_PATH/${TUMOR_ID}_${NORMAL_ID}_Mutect2.norm.vcf
+H_TVCF=$OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz
+H_TVCF_F_Norm=$OUTPUT_PATH/${TUMOR_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf
+H_NVCF=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz
+H_NVCF_F_Norm=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf
 OUTPUT_VCF_PATH=$OUTPUT_PATH/VEP_${TUMOR_ID}_${NORMAL_ID}
 
-$VEP_PATH/vep --cache --offline \
-    --cache_version 99 \
-    --merged \
-    --species mus_musculus \
-    --assembly GRCm38 \
-    --dir_plugins $VEP_PLUGIN_DIR \
-    --dir_cache $VEP_CACHE_DIR \
-    -i $INPUT_VCF_PATH \
-    --vcf \
-    -o ${OUTPUT_VCF_PATH}.vcf \
-    --check_existing \
-    --fork 4 \
-    --force_overwrite 
+#$VEP_PATH/vep --cache --offline \
+#    --cache_version 99 \
+#    --merged \
+#    --species mus_musculus \
+#    --assembly GRCm38 \
+#    --dir_plugins $VEP_PLUGIN_DIR \
+#    --dir_cache $VEP_CACHE_DIR \
+#    -i $M_VCF \
+#    --vcf \
+#    -o ${OUTPUT_VCF_PATH}.vcf \
+#    --check_existing \
+#    --fork 4 \
+#    --force_overwrite 
 
 $VEP_PATH/vep --cache --offline \
     --cache_version 99 \
@@ -42,9 +47,9 @@ $VEP_PATH/vep --cache --offline \
     --assembly GRCm38 \
     --dir_plugins $VEP_PLUGIN_DIR \
     --dir_cache $VEP_CACHE_DIR \
-    -i $INPUT_VCF_PATH \
+    -i $M_VCF \
     --tab \
-    -o ${OUTPUT_VCF_PATH}.txt \
+    -o $OUTPUT_PATH/VEP_${TUMOR_ID}_${NORMAL_ID}.txt \
     --check_existing \
     --fork 4 \
     --force_overwrite
@@ -60,3 +65,73 @@ $VEP_PATH/vep --cache --offline \
 #    --plugin satMutMPRA,file=$VEP_PLUGIN_DATA_DIR/satMutMPRA_GRCh37_ALL.gz,cols=ALL \
 #    --fork 4
 
+
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $M_VCF_F_Norm \
+    --tab \
+    -o $OUTPUT_PATH/VEP_${TUMOR_ID}_${NORMAL_ID}.norm.txt \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
+
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $H_TVCF \
+    --tab \
+    -o $OUTPUT_PATH/VEP_${TUMOR_ID}.txt \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
+
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $H_TVCF_F_Norm \
+    --tab \
+    -o $OUTPUT_PATH/VEP_${TUMOR_ID}.norm.txt \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
+
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $H_NVCF \
+    --tab \
+    -o $OUTPUT_PATH/VEP_${NORMAL_ID}.txt \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
+
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $H_NVCF_F_Norm \
+    --tab \
+    -o $OUTPUT_PATH/VEP_${NORMAL_ID}.norm.txt \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
