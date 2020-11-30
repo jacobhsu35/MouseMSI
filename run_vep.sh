@@ -26,19 +26,20 @@ H_NVCF=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.haplotype.SnpIndel.vcf.gz
 H_NVCF_F_Norm=$OUTPUT_PATH/${NORMAL_ID}_marked.recal.pass1.filtered.haplotype.SnpIndel.norm.vcf
 OUTPUT_VCF_PATH=$OUTPUT_PATH/VEP_${TUMOR_ID}_${NORMAL_ID}
 
-#$VEP_PATH/vep --cache --offline \
-#    --cache_version 99 \
-#    --merged \
-#    --species mus_musculus \
-#    --assembly GRCm38 \
-#    --dir_plugins $VEP_PLUGIN_DIR \
-#    --dir_cache $VEP_CACHE_DIR \
-#    -i $M_VCF \
-#    --vcf \
-#    -o ${OUTPUT_VCF_PATH}.vcf \
-#    --check_existing \
-#    --fork 4 \
-#    --force_overwrite 
+### VEP annotation for default Mutect2 VCF
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $M_VCF \
+    --vcf \
+    -o $OUTPUT_PATH/VEP_${TUMOR_ID}_${NORMAL_ID}.vcf \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite 
 
 $VEP_PATH/vep --cache --offline \
     --cache_version 99 \
@@ -65,6 +66,20 @@ $VEP_PATH/vep --cache --offline \
 #    --plugin satMutMPRA,file=$VEP_PLUGIN_DATA_DIR/satMutMPRA_GRCh37_ALL.gz,cols=ALL \
 #    --fork 4
 
+### VEP annotation for 1)filtered and 2)VT normalized VCF
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $M_VCF_F_Norm \
+    --vcf \
+    -o $OUTPUT_PATH/VEP_${TUMOR_ID}_${NORMAL_ID}.norm.vcf \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
 
 $VEP_PATH/vep --cache --offline \
     --cache_version 99 \
@@ -76,6 +91,21 @@ $VEP_PATH/vep --cache --offline \
     -i $M_VCF_F_Norm \
     --tab \
     -o $OUTPUT_PATH/VEP_${TUMOR_ID}_${NORMAL_ID}.norm.txt \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
+
+### VEP annotation for HaplotypeCaller Tumor VCF
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $H_TVCF \
+    --vcf \
+    -o $OUTPUT_PATH/VEP_${TUMOR_ID}.vcf \
     --check_existing \
     --fork 4 \
     --force_overwrite
@@ -94,6 +124,21 @@ $VEP_PATH/vep --cache --offline \
     --fork 4 \
     --force_overwrite
 
+### VEP annotation for HaplotypeCaller 1)filtered and 2)VT Normalized Tumor VCF
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $H_TVCF_F_Norm \
+    --vcf \
+    -o $OUTPUT_PATH/VEP_${TUMOR_ID}.norm.vcf \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
+
 $VEP_PATH/vep --cache --offline \
     --cache_version 99 \
     --merged \
@@ -108,6 +153,22 @@ $VEP_PATH/vep --cache --offline \
     --fork 4 \
     --force_overwrite
 
+
+### VEP annotation for HaplotypeCaller Normal part VCF
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $H_NVCF \
+    --vcf \
+    -o $OUTPUT_PATH/VEP_${NORMAL_ID}.vcf \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
+
 $VEP_PATH/vep --cache --offline \
     --cache_version 99 \
     --merged \
@@ -118,6 +179,21 @@ $VEP_PATH/vep --cache --offline \
     -i $H_NVCF \
     --tab \
     -o $OUTPUT_PATH/VEP_${NORMAL_ID}.txt \
+    --check_existing \
+    --fork 4 \
+    --force_overwrite
+
+### VEP annotation for HaplotypeCaller 1)filtered and 2)VT Normalized Normal part VCF
+$VEP_PATH/vep --cache --offline \
+    --cache_version 99 \
+    --merged \
+    --species mus_musculus \
+    --assembly GRCm38 \
+    --dir_plugins $VEP_PLUGIN_DIR \
+    --dir_cache $VEP_CACHE_DIR \
+    -i $H_NVCF_F_Norm \
+    --vcf \
+    -o $OUTPUT_PATH/VEP_${NORMAL_ID}.norm.vcf \
     --check_existing \
     --fork 4 \
     --force_overwrite
